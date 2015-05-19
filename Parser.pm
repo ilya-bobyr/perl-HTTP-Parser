@@ -296,7 +296,9 @@ sub _parse_header {
 
   # check for transfer-encoding, and handle chunking
   if(my @te = $obj->header('transfer_encoding')) {
-    if(grep { lc $_ eq 'chunked' } @te) {
+    # RFC 7230, section 3.3.1 allows for compression and other values to be
+    # specified through the Transfer-Encoding headers.
+    if(grep { $_ =~ m/(?: , | ^) \s* chunked\s*$/ix } @te) {
       $self->{state} = 'chunked';
       return $self->_parse_chunk();
     }
